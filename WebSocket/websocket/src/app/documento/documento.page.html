@@ -1,0 +1,35 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-button slot="start" (click)="goBack()" >
+        <ion-icon name="chevron-back"></ion-icon>
+    </ion-button>
+    <ion-title>{{documentoSelecionado.nome}}</ion-title>
+    <ion-button slot="end" color="danger" (click)="deleteDoc()" >
+        <ion-icon name="trash"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">{{documentoSelecionado.nome}}</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <ion-grid>
+    <ion-row>
+        <ion-col size="10">
+            <form [formGroup]="form">
+                <ion-textarea formControlName="textArea" rows="30" style="--border-radius: 20px; --padding-start: 10px" placeholder="Digite aqui..." (ionInput)="sendChange($event)" ></ion-textarea>
+            </form>
+        </ion-col>
+        <div style="display: flex; flex-direction: column; flex-wrap: wrap; align-items: center;">
+            <p style="margin-bottom: 5px; padding: 0px !important;">Usuários Conectados:</p>
+            <div *ngFor="let usuarioConectado of usuariosConectados" 
+            style="display: flex; background-color: darkgray; width: 50px; height: 50px; border-radius: 50%; align-items: center; justify-content: center; margin-bottom: 5px;">
+                {{usuarioConectado.user.nome[0].toUpperCase()}}{{usuarioConectado.user.nome[1].toUpperCase()}}
+            </div>
+        </div>
+    </ion-row>
+  </ion-grid>
+</ion-content>

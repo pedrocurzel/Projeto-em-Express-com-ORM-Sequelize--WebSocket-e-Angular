@@ -1,0 +1,31 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      Documentos
+    </ion-title>
+    <ion-button slot="end" color="danger" (click)="logout()" >Sair</ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Documentos</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div *ngIf="ready" style="display: flex; flex-direction: column; flex-wrap: wrap; align-items: center;">
+    <h1>Bem vindo {{user.nome}}</h1>
+    <h4>Selecione um documento abaixo para edita-lo:</h4>
+    <ion-list style="padding: 0px !important;width: 100%;">
+        <ion-item *ngFor="let doc of docs" button="true" detail="true" lines="none" style="width: 100%;" (click)="editarDocumento(doc)">
+            <ion-label>{{doc.nome}}</ion-label>
+        </ion-item>
+    </ion-list>
+  </div>
+</ion-content>
+<ion-footer>
+    <ion-toolbar>
+        <ion-button (click)="criarDocumento()">Criar documento +</ion-button>
+    </ion-toolbar>
+</ion-footer>

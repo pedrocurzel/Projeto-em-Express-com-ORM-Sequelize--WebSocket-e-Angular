@@ -1,0 +1,19 @@
+<ion-content>
+    <div style="display: flex; flex-direction: column; align-items: center; padding: 30px;">
+        <ion-row style="width: 100%;">
+            <ion-col size="3"></ion-col>
+            <ion-col size="6" style="text-align: center;">
+                <h1 style="padding: 0px !important;margin: 0px !important;">Novo Documento</h1>
+            </ion-col>
+            <ion-col style="display: flex; flex-direction: row; align-items: center; justify-content: end;" size="3">
+                <ion-button (click)="close()" color="danger">
+                    <ion-icon name="close"></ion-icon>
+                </ion-button>
+            </ion-col>
+        </ion-row>
+        <ion-input [(ngModel)]="nome" style="width: 100%;" placeholder="Digite o nome aqui" labelPlacement="floating" label="Nome"></ion-input>
+    </div>
+</ion-content>
+<ion-footer>
+    <ion-button expand="block" color="success" (click)="criarDoc()" >Criar</ion-button>
+</ion-footer>

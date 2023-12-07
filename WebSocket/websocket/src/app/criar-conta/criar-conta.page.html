@@ -1,0 +1,30 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-back-button slot="start"></ion-back-button>
+    <ion-title>Criar conta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+    <ion-header collapse="condense">
+        <ion-toolbar>
+            <ion-title size="large">Criar conta</ion-title>
+        </ion-toolbar>
+    </ion-header>
+    <div style="padding: 30px;">
+        <form [formGroup]="form" (submit)="criarConta()">
+            <ion-list>
+                <ion-item lines="none">
+                    <ion-input labelPlacement="floating" placeholder="Nome" label="Nome" formControlName="nome"></ion-input>
+                </ion-item>
+                <ion-item lines="none">
+                    <ion-input labelPlacement="floating" placeholder="Email" label="Email" formControlName="email"></ion-input>
+                </ion-item>
+                <ion-item lines="none">
+                    <ion-input labelPlacement="floating" placeholder="Password" label="Password" formControlName="password"></ion-input>
+                </ion-item>
+            </ion-list>
+            <ion-button [disabled]="!form.valid" type="submit" expand="block" color="success">Criar</ion-button>
+        </form>
+    </div>
+</ion-content>
