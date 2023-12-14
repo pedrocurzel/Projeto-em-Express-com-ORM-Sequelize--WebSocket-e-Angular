@@ -13,15 +13,21 @@
       <ion-title size="large">Documentos</ion-title>
     </ion-toolbar>
   </ion-header>
-
   <div *ngIf="ready" style="display: flex; flex-direction: column; flex-wrap: wrap; align-items: center;">
     <h1>Bem vindo {{user.nome}}</h1>
-    <h4>Selecione um documento abaixo para edita-lo:</h4>
-    <ion-list style="padding: 0px !important;width: 100%;">
-        <ion-item *ngFor="let doc of docs" button="true" detail="true" lines="none" style="width: 100%;" (click)="editarDocumento(doc)">
-            <ion-label>{{doc.nome}}</ion-label>
-        </ion-item>
-    </ion-list>
+    <div *ngIf="docs.length > 0">
+      <h4>Selecione um documento abaixo para edita-lo:</h4>
+      <ion-list style="padding: 0px !important;width: 100%;">
+          <ion-item *ngFor="let doc of docs" button="true" detail="true" lines="none" style="width: 100%;" (click)="editarDocumento(doc)">
+              <ion-label>{{doc.nome}}</ion-label>
+          </ion-item>
+      </ion-list>
+    </div>
+    <div *ngIf="docs.length == 0">
+      <div>
+        <h4>Nenhum documento criado ainda! </h4>
+      </div>
+    </div>
   </div>
 </ion-content>
 <ion-footer>

@@ -15,5 +15,5 @@
     </div>
 </ion-content>
 <ion-footer>
-    <ion-button expand="block" color="success" (click)="criarDoc()" >Criar</ion-button>
+    <ion-button expand="block" color="success" (click)="criarDoc()" [disabled]="nome.length < 2" >Criar</ion-button>
 </ion-footer>

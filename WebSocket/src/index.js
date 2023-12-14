@@ -5,12 +5,14 @@ const cors = require("cors");
 const http = require("http");
 const {Server} = require("socket.io");
 const database = require("../models");
+const chats_routes = require("./routes/chats_routes.js");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 auth_routes(app);
 doc_routes(app);
+chats_routes(app);
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -19,46 +21,64 @@ const io = new Server(server, {
     }
 });
 let usuariosPorSala = {};
+let usuariosConectadosApp = [];
 io.on("connection", (socket) => {
-    console.log(`connect ${socket.id}`);
-    socket.on("conectar_sala", async (sala) => {
-        socket.join(sala.sala);
-        if (!usuariosPorSala[sala.sala]) {
-            usuariosPorSala[sala.sala] = [];
-            usuariosPorSala[sala.sala].push({user: sala.usuario, socket: socket.id, sala: sala.sala});
-        } else {
-            usuariosPorSala[sala.sala].push({user: sala.usuario, socket: socket.id, sala: sala.sala});
+    console.log(socket.id);
+
+    socket.on("usuario_conectou_app", (usuario) => {
+        
+        usuariosConectadosApp.push({
+            socket: socket.id,
+            usuario
+        });
+        console.log(usuariosConectadosApp);
+        io.emit("usuario_conectou_app", usuariosConectadosApp);
+    })
+
+    socket.on("conectar_sala", (value) => {
+        socket.join(value.sala);
+        if (!usuariosPorSala[value.sala]) {
+            usuariosPorSala[value.sala] = [];   
         }
-        let valorBanco = await database.Documentos.findOne({where: {nome: sala.sala}});
-        io.to(sala.sala).emit("usuario_conectou", usuariosPorSala[sala.sala]);
-        io.to(sala.sala).emit("valores_banco", valorBanco.valor);
+        usuariosPorSala[value.sala].push({
+            socket: socket.id,
+            user: value.usuario
+        })
+
+        io.to(value.sala).emit("usuarios_conectados", usuariosPorSala[value.sala]);
     })
 
-    socket.on("documento_criado", async () => {
-        io.emit("documento_criado", (await database.Documentos.findAll()));
+    socket.on("textarea_value", async (value) => {
+        await database.Documentos.update({valor: value.value}, {where: {nome: value.sala}});
+        socket.to(value.sala).emit("textarea_value", value.value);
     })
 
-    socket.on("delete_doc", (docName) => {
-        database.Documentos.destroy({where: {nome: docName}});
-        socket.broadcast.emit("delete_doc", docName);
+    socket.on("desconectar_sala", (sala) => {
+        socket.leave(sala);
+        usuariosPorSala[sala].splice(usuariosPorSala[sala].findIndex(usuario => usuario.socket == socket.id), 1);
+        socket.to(sala).emit("usuarios_conectados", usuariosPorSala[sala]);
     })
 
-    socket.on("valor_textarea", async (valor) => {
-        await database.Documentos.update({valor: valor.valor}, {where: {nome: valor.sala}});
-        socket.to(valor.sala).emit("valor_textarea", valor.valor);
+    socket.on("documento_criado", (novoDoc) => {
+        socket.broadcast.emit("documento_criado", novoDoc);
     })
 
-    socket.on("disconnect", (user) => {
-        console.log(`disconnect ${user}`);
-        for (const [key, value] of Object.entries(usuariosPorSala)) {
-            value.forEach((val, i) => {
-                if (val.socket == socket.id) {
-                    usuariosPorSala[key].splice(i, 1);
-                    io.to(val.sala).emit("usuario_conectou", usuariosPorSala[val.sala]);
-                }
-            })
+    socket.on("delete_doc", async (docName) => {
+        await database.Documentos.destroy({where: {nome: docName}});
+        socket.to(docName).emit("documento_deletado", docName);
+        io.emit("deletar_documento_home", docName);
+    })
+
+    socket.on("disconnecting", (msg) => {
+        console.log("asdasdasdadsasd");
+        usuariosConectadosApp.splice(usuariosConectadosApp.findIndex(usuario => usuario.socket == socket.id), 1);
+        io.emit("usuario_conectou_app", usuariosConectadosApp);
+        for (let item of socket.rooms.keys()) {
+            if (usuariosPorSala[item]) {
+                usuariosPorSala[item].splice(usuariosPorSala[item].findIndex(user => user.socket == socket.id),1);
+                socket.to(item).emit("usuarios_conectados", usuariosPorSala[item]);
+            }
         }
-  
     })
 })
 

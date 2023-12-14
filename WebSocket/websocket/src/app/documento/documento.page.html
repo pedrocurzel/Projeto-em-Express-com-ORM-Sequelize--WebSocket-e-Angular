@@ -27,7 +27,7 @@
             <p style="margin-bottom: 5px; padding: 0px !important;">Usuários Conectados:</p>
             <div *ngFor="let usuarioConectado of usuariosConectados" 
             style="display: flex; background-color: darkgray; width: 50px; height: 50px; border-radius: 50%; align-items: center; justify-content: center; margin-bottom: 5px;">
-                {{usuarioConectado.user.nome[0].toUpperCase()}}{{usuarioConectado.user.nome[1].toUpperCase()}}
+                {{usuarioConectado.user.nome[0]}}{{usuarioConectado.user.nome[1]}}
             </div>
         </div>
     </ion-row>

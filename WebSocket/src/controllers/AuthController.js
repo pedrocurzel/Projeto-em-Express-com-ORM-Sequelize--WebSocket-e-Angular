@@ -15,7 +15,8 @@ module.exports = class AuthController {
                     token,
                     user: {
                         nome: userDb.nome,
-                        email: userDb.email
+                        email: userDb.email,
+                        userId: userDb.id
                     }
                 })
             }

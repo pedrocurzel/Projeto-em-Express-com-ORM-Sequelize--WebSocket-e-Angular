@@ -24,7 +24,10 @@ const routes: Routes = [
   {
     path: 'documento',
     loadChildren: () => import('./documento/documento.module').then( m => m.DocumentoPageModule)
-  }
+  },
+
+
+
 ];
 
 @NgModule({

@@ -12,7 +12,7 @@ export class RoutesService {
     await this.navCtrl.navigateRoot(route);
   }
 
-  async routeForward(route: string) {
+  async routeForward(route: string,) {
     await this.navCtrl.navigateForward(route);
   }
 

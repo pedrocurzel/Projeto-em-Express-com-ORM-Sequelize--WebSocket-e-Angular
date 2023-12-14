@@ -5,11 +5,11 @@ export default class Documento {
     createdAt: Date;
     updatedAt: Date;
 
-    constructor(id:number,nome:string,valor:string,createdAt:string, updatedAt:string) {
-        this.id = id;
-        this.nome = nome;
-        this.valor = valor;
-        this.createdAt = new Date(createdAt);
-        this.updatedAt = new Date(updatedAt);
+    constructor(docJson: any) {
+        this.id = docJson.id;
+        this.nome = docJson.nome;
+        this.valor = docJson.valor;
+        this.createdAt = new Date(docJson.createdAt);
+        this.updatedAt = new Date(docJson.updatedAt);
     }
 }

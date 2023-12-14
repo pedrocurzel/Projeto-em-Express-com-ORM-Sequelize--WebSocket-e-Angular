@@ -4,6 +4,8 @@ import { Socket } from 'ngx-socket-io';
 import { FormBuilder } from '@angular/forms';
 import { ModalController, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
 import { RoutesService } from '../services/routes.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-documento',
@@ -12,7 +14,7 @@ import { RoutesService } from '../services/routes.service';
 })
 export class DocumentoPage implements OnInit {
 
-    constructor(private socket: Socket, public formBuilder: FormBuilder, private routerService: RoutesService) { }
+    constructor(private socket: Socket, public formBuilder: FormBuilder, private routerService: RoutesService, private http: HttpClient) { }
 
     ready = false;
     documentoSelecionado!: Documento;
@@ -24,30 +26,32 @@ export class DocumentoPage implements OnInit {
 
     async ngOnInit() {
         this.ready = false;
-        let doc = JSON.parse(localStorage.getItem("documento-selecionado")!);
-        this.documentoSelecionado = new Documento(doc.id, doc.nome, doc.valor, doc.createdAt, doc.updatedAt);
-        this.usuario = JSON.parse(localStorage.getItem("usuario")!);
+        let docJSON = JSON.parse(localStorage.getItem("documento_selecionado")!);
+        this.documentoSelecionado = new Documento(docJSON);
+        await this.getDocValue();
         this.handleSocket();
+        this.socket.on("documento_deletado", (docName: any) => {
+            this.goBack();
+        })
         this.ready = true;
     }
 
+    async getDocValue() {
+        var res = (await this.http.get<doc>(environment.api + `/getDocumento/${this.documentoSelecionado.id}`).toPromise())!;
+        this.form.patchValue({
+            textArea: res.doc.valor
+        })
+    }
+
     goBack() {
-        this.socket.disconnect();
-        setTimeout(() => {
-            this.routerService.routeBackward("home");
-        }, 50);
+        this.socket.emit("desconectar_sala", this.documentoSelecionado.nome);
+        this.routerService.routeBackward("home");
     }
 
     handleSocket() {
-        this.socket.connect();
         this.conectarSalaSocket();
-        this.receberUsuarios();
         this.recebeValorBancoSocket();
-        this.recebeValoresSocket();
-        this.socket.on("delete_doc", (valor: any) => {
-            alert("O documento atual foi deletado por outro usuário, voltando para tela inicial.")
-            this.goBack();
-        })
+        this.receberUsuarios();
     }
 
     deleteDoc() {
@@ -56,35 +60,55 @@ export class DocumentoPage implements OnInit {
     }
 
     receberUsuarios() {
-        this.socket.on("usuario_conectou", (res: any) => {
-            console.log(res);
-            
-            this.usuariosConectados = res;
+        this.socket.on("usuarios_conectados", (value: any) => {
+            this.usuariosConectados = value;
+            console.log(this.usuariosConectados);
+            this.usuariosConectados.forEach(user => {
+                try {
+                    user.user = JSON.parse(user.user);
+                } catch(error) {
+
+                }
+            })
+            //     
         })
+        
+        
     }
 
     conectarSalaSocket() {
-        this.socket.emit("conectar_sala", {sala: this.documentoSelecionado.nome, usuario: this.usuario});
+        this.socket.emit("conectar_sala", {
+            usuario: localStorage.getItem("usuario"),
+            sala: this.documentoSelecionado.nome
+        })
     }
 
     recebeValorBancoSocket() {
-        this.socket.on("valores_banco", (valor: any) => {
-            this.form.patchValue({textArea: valor});
+        this.socket.on("textarea_value", (value:any) => {
+            this.form.patchValue({
+                textArea: value
+            })
         })
     }
 
     recebeValoresSocket() {
-        this.socket.on("valor_textarea", (valor: any) => {
-            this.form.patchValue({textArea: valor});
-        })
     }
 
     sendChange(eve: any) {
-        this.socket.emit("valor_textarea", {
-            valor: this.form.controls.textArea.value,
-            usuario: this.usuario,
-            sala: this.documentoSelecionado.nome
+        this.socket.emit("textarea_value", {
+            value: this.form.controls.textArea.value,
+            sala: this.documentoSelecionado.nome,
+            usuario: localStorage.getItem("usuario")
         });
     }
 
+}
+
+
+interface doc {
+    error: boolean,
+    message: string,
+    doc: {
+        valor: string
+    }
 }
