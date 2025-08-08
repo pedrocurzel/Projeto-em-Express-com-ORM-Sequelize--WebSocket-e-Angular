@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { RoutesService } from '../services/routes.service';
 import { HttpClient } from '@angular/common/http';
 import Documento from '../models/Documento';
@@ -6,7 +6,7 @@ import { environment } from 'src/environments/environment';
 import { ModalController, ViewWillEnter, ViewWillLeave } from '@ionic/angular';
 import { CriarDocComponent } from '../components/criar-doc/criar-doc.component';
 import { Socket } from 'ngx-socket-io';
-
+import { interval, firstValueFrom, lastValueFrom } from 'rxjs';
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -20,6 +20,39 @@ export class HomePage implements OnInit {
     user: any;
     docs: Documento[] = [];
     usuariosLogados: any[] = [];
+    key: any;
+    @HostListener('document:keydown', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent) {
+        if (event.key == "ArrowDown" || event.key == "ArrowRight") {
+            this.selectNextItem();
+        }
+    }
+
+    selectNextItem() {
+        let currentSelectedItem = this.itens.filter(item => item.selected)[0];
+        let selectedItemIndex = this.itens.indexOf(currentSelectedItem);
+        currentSelectedItem.selected = false;
+        if (selectedItemIndex == this.itens.length - 1) {
+            this.itens[0].selected = true;
+        } else {
+            this.itens[selectedItemIndex + 1].selected = true;
+        }        
+    }
+
+    itens = [
+        {
+            nome: "1",
+            selected: true,
+        },
+        {
+            nome: "2",
+            selected: false,
+        },
+        {
+            nome: "3",
+            selected: false,
+        }
+    ]
 
     async ngOnInit() {
         this.ready = false;
@@ -46,9 +79,9 @@ export class HomePage implements OnInit {
         let res = await modal.onWillDismiss();
         //console.log(res);
         try {
-            var doc = await this.http.post<criarDoc>(environment.api + "/criar-documento", {
+            var doc = await lastValueFrom(this.http.post<criarDoc>(environment.api + "/criar-documento", {
                 nome: res.data!
-            }).toPromise();
+            }));
             this.docs.push(new Documento(doc!.docCriado));
             this.socket.emit("documento_criado", doc!.docCriado);
         } catch(err) {

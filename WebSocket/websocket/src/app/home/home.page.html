@@ -29,6 +29,12 @@
       </div>
     </div>
   </div>
+
+  <div style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+    <div *ngFor="let item of itens;" style="height: 50px; width: 50px; background-color: black; color: white; text-align: center;" [ngClass]="{'selected': item.selected}">
+      <p>{{item.nome}}</p>
+    </div>
+  </div>
 </ion-content>
 <ion-footer>
     <ion-toolbar>
